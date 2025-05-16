@@ -45,16 +45,16 @@ pub mod verified_addresses {
     use solana_program::pubkey::Pubkey;
 
     // Vault A addresses 
-    pub static A_VAULT_LP: Pubkey = solana_program::pubkey!("3NNXTmZPY2wwotbz8eRU5F9PpnDYG9vVMv5GYArSWA7F");
-    pub static A_VAULT_LP_MINT: Pubkey = solana_program::pubkey!("6toHu9J2rUigsStD4GNyCbMiybbqFhYjWnZtiHkRYrou");
-    pub static A_TOKEN_VAULT: Pubkey = solana_program::pubkey!("FnEXDYHyyN7ZBCsjZDx7psoCsVRTJ9orVC7ijtQuVhyv");
+    pub static A_VAULT_LP: Pubkey = solana_program::pubkey!("BGh2tc4kagmEmVvaogdcAodVDvUxmXWivYL5kxwapm31");
+    pub static A_VAULT_LP_MINT: Pubkey = solana_program::pubkey!("Bk33KwVZ8hsgr3uSb8GGNJZpAEqH488oYPvoY5W9djVP");
+    pub static A_TOKEN_VAULT: Pubkey = solana_program::pubkey!("HoASBFustFYysd9aCu6M3G3kve88j22LAyTpvCNp5J65");
     
     // Meteora pool addresses
-    pub static POOL_ADDRESS: Pubkey = solana_program::pubkey!("H7RMjuMb8GAv3NxvvsqLVHf4kyroagoeqmDiiM8198j9");
-    pub static B_VAULT_LP: Pubkey = solana_program::pubkey!("C3yfTo4r7AhpgDpmmjVG34WaUKV749748TXEgRCsBYK7");
+    pub static POOL_ADDRESS: Pubkey = solana_program::pubkey!("BEuzx33ecm4rtgjtB2bShqGco4zMkdr6ioyzPh6vY9ot");
+    pub static B_VAULT_LP: Pubkey = solana_program::pubkey!("8mNjx5Aww9DX33uFxZwqb7m2vhsavrxyzkME3hE63sT2");
     
     // Token and oracle addresses
-    pub static TOKEN_MINT: Pubkey = solana_program::pubkey!("H4T9Y1wGsexYKYshYbqHG3fKhu16nkJhyYQArp1Q1Adj");
+    pub static TOKEN_MINT: Pubkey = solana_program::pubkey!("51JpoNC5es8mpeRhPfTPcqMFzFhxeW3UrfvTmFnbw5G1");
     pub static WSOL_MINT: Pubkey = solana_program::pubkey!("So11111111111111111111111111111111111111112");
     
     // Chainlink addresses (Devnet)
