@@ -1142,7 +1142,7 @@ pub mod referral_system {
         
         let state = &mut ctx.accounts.state;
         state.owner = ctx.accounts.owner.key();
-        state.multisig_treasury = admin_addresses::MULTISIG_TREASURY;
+        state.multisig_treasury = verified_addresses::MULTISIG_TREASURY;
         state.next_upline_id = 1;
         state.next_chain_id = 1;
         
@@ -1152,7 +1152,7 @@ pub mod referral_system {
     // Register without a referrer (owner only)
     pub fn register_without_referrer(ctx: Context<RegisterWithoutReferrerDeposit>, deposit_amount: u64) -> Result<()> {
         // Verify if the caller is the program owner
-        if ctx.accounts.owner.key() != admin_addresses::MULTISIG_TREASURY {
+        if ctx.accounts.owner.key() != verified_addresses::MULTISIG_TREASURY {
             return Err(error!(ErrorCode::NotAuthorized));
         }
        
