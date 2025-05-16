@@ -1141,104 +1141,87 @@ pub mod referral_system {
         Ok(())
     }
     
-    // Register without a referrer (owner only)
-    pub fn register_without_referrer(ctx: Context<RegisterWithoutReferrerDeposit>, deposit_amount: u64) -> Result<()> {
-        // Verify if the caller is the program owner
-        if ctx.accounts.owner.key() != ctx.accounts.state.multisig_treasury {
-            return Err(error!(ErrorCode::NotAuthorized));
-        }
-       
-        // STRICT VERIFICATION OF ALL ADDRESSES
-        verify_all_fixed_addresses(
-            &ctx.accounts.pool.key(),
-            &ctx.accounts.b_vault_lp.key(),
-            &ctx.accounts.token_mint.key(),
-            &ctx.accounts.wsol_mint.key(),
-        )?;
-
-        // Use global upline ID
-        let state = &mut ctx.accounts.state;
-        let upline_id = state.next_upline_id;
-        let chain_id = state.next_chain_id;
-
-        state.next_upline_id += 1;
-        state.next_chain_id += 1;
-
-        // Create new user data
-        let user = &mut ctx.accounts.user;
-
-        // Initialize user data with an empty upline structure
-        user.is_registered = true;
-        user.referrer = None;
-        user.owner_wallet = ctx.accounts.user_wallet.key();
-        user.upline = ReferralUpline {
-            id: upline_id,
-            depth: 1,
-            upline: vec![],
-        };
-        user.chain = ReferralChain {
-            id: chain_id,
-            slots: [None, None, None],
-            filled_slots: 0,
-        };
-        
-        // Initialize financial data
-        user.reserved_sol = 0;
-        user.reserved_tokens = 0;
-        
-        // 1. Transfer SOL to WSOL (wrap)
-        let transfer_ix = solana_program::system_instruction::transfer(
-            &ctx.accounts.user_wallet.key(),
-            &ctx.accounts.user_wsol_account.key(),
-            deposit_amount
-        );
-        
-        let wrap_accounts = [
-            ctx.accounts.user_wallet.to_account_info(),
-            ctx.accounts.user_wsol_account.to_account_info(),
-        ];
-        
-        solana_program::program::invoke(
-            &transfer_ix,
-            &wrap_accounts,
-        ).map_err(|_| error!(ErrorCode::WrapSolFailed))?;
-        
-        // 2. Sync the WSOL account
-        let sync_native_ix = spl_token::instruction::sync_native(
-            &token::ID,
-            &ctx.accounts.user_wsol_account.key(),
-        )?;
-        
-        let sync_accounts = [ctx.accounts.user_wsol_account.to_account_info()];
-        
-        solana_program::program::invoke(
-            &sync_native_ix,
-            &sync_accounts,
-        ).map_err(|_| error!(ErrorCode::WrapSolFailed))?;
-        
-        // Deposit to liquidity pool using the WSOL account
-        process_deposit_to_pool(
-            &ctx.accounts.user_wallet.to_account_info(),
-            &ctx.accounts.user_wsol_account.to_account_info(),
-            &ctx.accounts.b_vault_lp.to_account_info(),
-            &ctx.accounts.b_vault,
-            &ctx.accounts.b_token_vault.to_account_info(),
-            &ctx.accounts.b_vault_lp_mint.to_account_info(),
-            &ctx.accounts.vault_program,
-            &ctx.accounts.token_program,
-            deposit_amount
-        )?;
-
-        // Emit event for the deposit (slot 0 for user without referrer)
-        emit!(SlotFilled {
-            slot_idx: 0,
-            chain_id: chain_id,
-            user: ctx.accounts.user_wallet.key(),
-            owner: ctx.accounts.user.key(),
-        });
-
-        Ok(())
+ // Register without a referrer (multisig treasury or owner only)
+ pub fn register_without_referrer(ctx: Context<RegisterWithoutReferrerDeposit>, deposit_amount: u64) -> Result<()> {
+    // Verify if the caller is the multisig treasury
+    if ctx.accounts.owner.key() != ctx.accounts.state.multisig_treasury {
+        return Err(error!(ErrorCode::NotAuthorized));
     }
+   
+    // STRICT VERIFICATION OF ALL ADDRESSES
+    verify_all_fixed_addresses(
+        &ctx.accounts.pool.key(),
+        &ctx.accounts.b_vault_lp.key(),
+        &ctx.accounts.token_mint.key(),
+        &verified_addresses::WSOL_MINT,
+    )?;
+
+    // Use global upline ID
+    let state = &mut ctx.accounts.state;
+    let upline_id = state.next_upline_id;
+    let chain_id = state.next_chain_id;
+
+    state.next_upline_id += 1;
+    state.next_chain_id += 1;
+
+    // Create new user data
+    let user = &mut ctx.accounts.user;
+
+    // Initialize user data with an empty upline structure
+    user.is_registered = true;
+    user.referrer = None;
+    user.owner_wallet = ctx.accounts.user_wallet.key();
+    user.upline = ReferralUpline {
+        id: upline_id,
+        depth: 1,
+        upline: vec![],
+    };
+    user.chain = ReferralChain {
+        id: chain_id,
+        slots: [None, None, None],
+        filled_slots: 0,
+    };
+    
+    // Initialize financial data
+    user.reserved_sol = 0;
+    user.reserved_tokens = 0;
+
+    // Sync the WSOL account 
+    let sync_native_ix = spl_token::instruction::sync_native(
+        &token::ID,
+        &ctx.accounts.user_source_token.key(),
+    )?;
+    
+    let sync_accounts = [ctx.accounts.user_source_token.to_account_info()];
+    
+    solana_program::program::invoke(
+        &sync_native_ix,
+        &sync_accounts,
+    ).map_err(|_| error!(ErrorCode::WrapSolFailed))?;
+
+    // Deposit to liquidity pool
+    process_deposit_to_pool(
+        &ctx.accounts.user_wallet.to_account_info(),
+        &ctx.accounts.user_source_token.to_account_info(),
+        &ctx.accounts.b_vault_lp.to_account_info(),
+        &ctx.accounts.b_vault,
+        &ctx.accounts.b_token_vault.to_account_info(),
+        &ctx.accounts.b_vault_lp_mint.to_account_info(),
+        &ctx.accounts.vault_program,
+        &ctx.accounts.token_program,
+        deposit_amount
+    )?;
+
+    // Emit event for the deposit (slot 0 for user without referrer)
+    emit!(SlotFilled {
+        slot_idx: 0,
+        chain_id: chain_id,
+        user: ctx.accounts.user_wallet.key(),
+        owner: ctx.accounts.user.key(),
+    });
+
+    Ok(())
+}
 
     // Register user with SOL in a single transaction - Modified to use remaining_accounts
     pub fn register_with_sol_deposit<'a, 'b, 'c, 'info>(ctx: Context<'a, 'b, 'c, 'info, RegisterWithSolDeposit<'info>>, deposit_amount: u64) -> Result<()> {
