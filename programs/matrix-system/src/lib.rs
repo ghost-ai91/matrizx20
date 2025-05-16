@@ -60,18 +60,23 @@ pub mod verified_addresses {
     // Chainlink addresses (Devnet)
     pub static CHAINLINK_PROGRAM: Pubkey = solana_program::pubkey!("HEvSKofvBgfaexv23kMabbYqxasxU3mQ4ibBMEmJWHny");
     pub static SOL_USD_FEED: Pubkey = solana_program::pubkey!("99B2bTijsU6f1GCT73HmdR7HCFFjGMBcPZY6jZ96ynrR");
+
+    //Multisig treasury
+    pub static MULTISIG_TREASURY: Pubkey = solana_program::pubkey!("Eu22Js2qTu5bCr2WFY2APbvhDqAhUZpkYKmVsfeyqR2N");
+
 }
 
 // Program state structure
 #[account]
 pub struct ProgramState {
     pub owner: Pubkey,
+    pub multisig_treasury: Pubkey,
     pub next_upline_id: u32,
     pub next_chain_id: u32,
 }
 
 impl ProgramState {
-    pub const SIZE: usize = 32 + 4 + 4; // owner + next_upline_id + next_chain_id
+    pub const SIZE: usize = 32 + 32 + 4 + 4; // owner + multisig_treasury + next_upline_id + next_chain_id
 }
 
 // Structure to store complete information for each upline
@@ -125,7 +130,7 @@ impl UserAccount {
 pub enum ErrorCode {
     #[msg("State account already initialized")]
     AlreadyInitialized,
-
+    
     #[msg("Invalid state account (must be owned by program)")]
     InvalidStateAccount,
 
@@ -1130,23 +1135,24 @@ pub mod referral_system {
     use super::*;
 
     // Initialize program state
-     pub fn initialize(ctx: Context<Initialize>) -> Result<()> {
-    if ctx.accounts.state.owner != Pubkey::default() {
-        return Err(error!(ErrorCode::AlreadyInitialized));
+    pub fn initialize(ctx: Context<Initialize>) -> Result<()> {
+        if ctx.accounts.state.owner != Pubkey::default() {
+            return Err(error!(ErrorCode::AlreadyInitialized));
+        }
+        
+        let state = &mut ctx.accounts.state;
+        state.owner = ctx.accounts.owner.key();
+        state.multisig_treasury = admin_addresses::MULTISIG_TREASURY;
+        state.next_upline_id = 1;
+        state.next_chain_id = 1;
+        
+        Ok(())
     }
-    
-    let state = &mut ctx.accounts.state;
-    state.owner = ctx.accounts.owner.key();
-    state.next_upline_id = 1;
-    state.next_chain_id = 1;
-    
-    Ok(())
-}
     
     // Register without a referrer (owner only)
     pub fn register_without_referrer(ctx: Context<RegisterWithoutReferrerDeposit>, deposit_amount: u64) -> Result<()> {
         // Verify if the caller is the program owner
-        if ctx.accounts.owner.key() != ctx.accounts.state.owner {
+        if ctx.accounts.owner.key() != admin_addresses::MULTISIG_TREASURY {
             return Err(error!(ErrorCode::NotAuthorized));
         }
        
