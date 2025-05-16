@@ -125,7 +125,7 @@ impl UserAccount {
 pub enum ErrorCode {
     #[msg("State account already initialized")]
     AlreadyInitialized,
-    
+
     #[msg("Invalid state account (must be owned by program)")]
     InvalidStateAccount,
 
@@ -932,8 +932,8 @@ fn process_referrer_chain<'info>(
 pub struct Initialize<'info> {
     #[account(
         mut,
-        constraint = state.owner == program_id @ ErrorCode::InvalidStateAccount,
-        constraint = state.data_len() == 8 + ProgramState::SIZE @ ErrorCode::InvalidStateSize
+        constraint = state.owner == crate::ID @ ErrorCode::InvalidStateAccount,
+        constraint = state.to_account_info().data_len() == 8 + ProgramState::SIZE @ ErrorCode::InvalidStateSize
     )]
     pub state: Account<'info, ProgramState>,
 
