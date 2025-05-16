@@ -123,6 +123,15 @@ impl UserAccount {
 // Error codes
 #[error_code]
 pub enum ErrorCode {
+    #[msg("State account already initialized")]
+    AlreadyInitialized,
+    
+    #[msg("Invalid state account (must be owned by program)")]
+    InvalidStateAccount,
+
+    #[msg("Invalid state account size")]
+    InvalidStateSize,
+
     #[msg("Invalid vault A LP address")]
     InvalidVaultALpAddress,
     
@@ -922,9 +931,9 @@ fn process_referrer_chain<'info>(
 #[derive(Accounts)]
 pub struct Initialize<'info> {
     #[account(
-        init,
-        payer = owner,
-        space = 8 + ProgramState::SIZE
+        mut,
+        constraint = state.owner == program_id @ ErrorCode::InvalidStateAccount,
+        constraint = state.data_len() == 8 + ProgramState::SIZE @ ErrorCode::InvalidStateSize
     )]
     pub state: Account<'info, ProgramState>,
 
@@ -1121,14 +1130,18 @@ pub mod referral_system {
     use super::*;
 
     // Initialize program state
-    pub fn initialize(ctx: Context<Initialize>) -> Result<()> {
-        let state = &mut ctx.accounts.state;
-        state.owner = ctx.accounts.owner.key();
-        state.next_upline_id = 1;
-        state.next_chain_id = 1;
-        
-        Ok(())
+     pub fn initialize(ctx: Context<Initialize>) -> Result<()> {
+    if ctx.accounts.state.owner != Pubkey::default() {
+        return Err(error!(ErrorCode::AlreadyInitialized));
     }
+    
+    let state = &mut ctx.accounts.state;
+    state.owner = ctx.accounts.owner.key();
+    state.next_upline_id = 1;
+    state.next_chain_id = 1;
+    
+    Ok(())
+}
     
     // Register without a referrer (owner only)
     pub fn register_without_referrer(ctx: Context<RegisterWithoutReferrerDeposit>, deposit_amount: u64) -> Result<()> {
