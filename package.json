@@ -8,6 +8,7 @@
     "@solana/web3.js": "^1.98.2",
     "assert": "*",
     "bn.js": "*",
+    "bs58": "^4.0.1",
     "rpc-websockets": "^10.0.0"
   },
   "devDependencies": {
