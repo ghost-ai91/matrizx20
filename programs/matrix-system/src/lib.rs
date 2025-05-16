@@ -973,13 +973,8 @@ pub struct RegisterWithoutReferrerDeposit<'info> {
     pub user: Account<'info, UserAccount>,
 
     // WSOL ATA account
-    #[account(
-        init,
-        payer = user_wallet,
-        associated_token::mint = wsol_mint,
-        associated_token::authority = user_wallet
-    )]
-    pub user_wsol_account: Account<'info, TokenAccount>,
+    #[account(mut)]
+    pub user_source_token: UncheckedAccount<'info>,
     
     // WSOL mint
     /// CHECK: This is the fixed WSOL mint address
