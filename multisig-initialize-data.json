@@ -1,0 +1,38 @@
+{
+  "transaction": {
+    "base58Transaction": "6gTUZDxHNQ2STzFiUJ54nsek3rEG1wNLng96B7Cq6nVzo6ZkL4SSZD6deJMQjuW8BU84eDjimfBfScYBs6zWde8YfpBvAPm3s38vbU6ypNYpHFyCtCTjFRxVSypAzdCmvcovaouDqyZmpLLj1x83CmjyyH7XtesfG98ZT9SfHPh1xgEjCRcnGxpuvwzuDERpxpUPhamUi7dZWaQtdJjfXBoB5u7NsYXxLdHkTk7PqC3MWBnLiGtaciwvB2uk8JFib8euhSyf8Z4Dy6SzAXdDUoWd6QC2o9SfgMxVBMJkB6oUTuG1EC5SqNZrHN3Eiu9xm3zvDnSgPxw2WKwHmHej5Jf3kdQrxQKzQQWcbq4Tz4A3GjWwxHGf8sAoSmjzhHLwFJmAN4dAhfmx7EZ1HkwRHLE9oddUZ5ETN3Gx",
+    "customInstruction": {
+      "programId": "2SGUTp3c4oNUpTdsr1nEfp2j96VEyFVfQLqK7kNukHGk",
+      "accounts": [
+        {
+          "pubkey": "27MVfE46xcUGmTH6FJVgBBFUzvh5H2smNfAYCjwQjyyG",
+          "isSigner": false,
+          "isWritable": true
+        },
+        {
+          "pubkey": "Eu22Js2qTu5bCr2WFY2APbvhDqAhUZpkYKmVsfeyqR2N",
+          "isSigner": true,
+          "isWritable": true
+        },
+        {
+          "pubkey": "11111111111111111111111111111111",
+          "isSigner": false,
+          "isWritable": false
+        }
+      ],
+      "dataBase58": "WPNHsFPyEMr"
+    }
+  },
+  "statePublicKey": "27MVfE46xcUGmTH6FJVgBBFUzvh5H2smNfAYCjwQjyyG",
+  "statePrivateKeyBase58": "3ANNmSYBvzEaojP74ZYbmo8BLsugoQZ2WAaiWmnFMsNGpMECJSuXBX9y4RnUYK3wSLSTGCVmpfHyXJtALkNWYZXC",
+  "programID": "2SGUTp3c4oNUpTdsr1nEfp2j96VEyFVfQLqK7kNukHGk",
+  "multisigTreasury": "Eu22Js2qTu5bCr2WFY2APbvhDqAhUZpkYKmVsfeyqR2N",
+  "tokenMint": "51JpoNC5es8mpeRhPfTPcqMFzFhxeW3UrfvTmFnbw5G1",
+  "tokenMintAuthority": "Fat1Wd3MGTDHi2Hjt4EdotmYs3phCzVekiwNagCn3xTt",
+  "tokenMintAuthorityBump": 252,
+  "programSolVault": "GB2K8Acd7vrfyorSQ3CMiWLTTf9reUTJ8dhkcVW5Ndaq",
+  "programSolVaultBump": 255,
+  "vaultAuthority": "eqPHi4gJXSrNrkwKC4WDUHK3aeBoCNaej5FzXTyrab1",
+  "vaultAuthorityBump": 255,
+  "programTokenVault": "635TYbzwiQqVtzZjNwzXWNo9jippmZFWgqifrnZKAtuU"
+}
