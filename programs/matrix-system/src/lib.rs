@@ -60,10 +60,13 @@ pub mod verified_addresses {
     // Chainlink addresses (Devnet)
     pub static CHAINLINK_PROGRAM: Pubkey = solana_program::pubkey!("HEvSKofvBgfaexv23kMabbYqxasxU3mQ4ibBMEmJWHny");
     pub static SOL_USD_FEED: Pubkey = solana_program::pubkey!("99B2bTijsU6f1GCT73HmdR7HCFFjGMBcPZY6jZ96ynrR");
+}
 
-    //Multisig treasury
+//Admin account
+pub mod admin_addresses {
+    use solana_program::pubkey::Pubkey;
+
     pub static MULTISIG_TREASURY: Pubkey = solana_program::pubkey!("Eu22Js2qTu5bCr2WFY2APbvhDqAhUZpkYKmVsfeyqR2N");
-
 }
 
 // Program state structure
@@ -936,15 +939,13 @@ fn process_referrer_chain<'info>(
 #[derive(Accounts)]
 pub struct Initialize<'info> {
     #[account(
-        mut,
-        constraint = state.owner == crate::ID @ ErrorCode::InvalidStateAccount,
-        constraint = state.to_account_info().data_len() == 8 + ProgramState::SIZE @ ErrorCode::InvalidStateSize
+        init,
+        payer = owner,
+        space = 8 + ProgramState::SIZE
     )]
     pub state: Account<'info, ProgramState>,
-
     #[account(mut)]
     pub owner: Signer<'info>,
-
     pub system_program: Program<'info, System>,
 }
 
@@ -1136,13 +1137,9 @@ pub mod referral_system {
 
     // Initialize program state
     pub fn initialize(ctx: Context<Initialize>) -> Result<()> {
-        if ctx.accounts.state.owner != Pubkey::default() {
-            return Err(error!(ErrorCode::AlreadyInitialized));
-        }
-        
         let state = &mut ctx.accounts.state;
         state.owner = ctx.accounts.owner.key();
-        state.multisig_treasury = verified_addresses::MULTISIG_TREASURY;
+        state.multisig_treasury = admin_addresses::MULTISIG_TREASURY;
         state.next_upline_id = 1;
         state.next_chain_id = 1;
         
@@ -1152,7 +1149,7 @@ pub mod referral_system {
     // Register without a referrer (owner only)
     pub fn register_without_referrer(ctx: Context<RegisterWithoutReferrerDeposit>, deposit_amount: u64) -> Result<()> {
         // Verify if the caller is the program owner
-        if ctx.accounts.owner.key() != verified_addresses::MULTISIG_TREASURY {
+        if ctx.accounts.owner.key() != ctx.accounts.state.multisig_treasury {
             return Err(error!(ErrorCode::NotAuthorized));
         }
        
