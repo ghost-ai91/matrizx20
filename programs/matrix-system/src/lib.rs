@@ -972,7 +972,7 @@ pub struct RegisterWithoutReferrerDeposit<'info> {
     )]
     pub user: Account<'info, UserAccount>,
 
-    // WSOL ATA account
+/// CHECK: User token account for Wrapped SOL, verified in the instruction code
     #[account(mut)]
     pub user_source_token: UncheckedAccount<'info>,
     
