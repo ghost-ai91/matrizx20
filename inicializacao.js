@@ -1,6 +1,6 @@
 // inicializacao.js
-const { Connection, Keypair, PublicKey, SystemProgram } = require('@solana/web3.js');
-const { AnchorProvider, Program, utils, Wallet } = require('@coral-xyz/anchor');
+const { Connection, Keypair, PublicKey, SystemProgram, Transaction } = require('@solana/web3.js');
+const { AnchorProvider, Program, utils } = require('@coral-xyz/anchor');
 const fs = require('fs');
 const path = require('path');
 
@@ -13,8 +13,8 @@ const configOutputPath = args[1] || './matriz-config.json';
 const idl = require('./target/idl/referral_system.json');
 
 // Configurações principais
-const PROGRAM_ID = new PublicKey("jFUpBH7wTd9G1EfFADhJCZ89CSujPoh15bdWL5NutT9");
-const TOKEN_MINT = new PublicKey("H4T9Y1wGsexYKYshYbqHG3fKhu16nkJhyYQArp1Q1Adj");
+const PROGRAM_ID = new PublicKey("2SGUTp3c4oNUpTdsr1nEfp2j96VEyFVfQLqK7kNukHGk");
+const TOKEN_MINT = new PublicKey("51JpoNC5es8mpeRhPfTPcqMFzFhxeW3UrfvTmFnbw5G1");
 const SPL_TOKEN_PROGRAM_ID = new PublicKey("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA");
 const ASSOCIATED_TOKEN_PROGRAM_ID = new PublicKey("ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL");
 const MULTISIG_TREASURY = new PublicKey("Eu22Js2qTu5bCr2WFY2APbvhDqAhUZpkYKmVsfeyqR2N");
@@ -70,80 +70,36 @@ async function main() {
       }
     }
     
-    // Gerar um novo keypair para o estado
-    const stateKeypair = Keypair.generate();
-    console.log("🔑 Novo endereço de estado: " + stateKeypair.publicKey.toString());
-    
-    // Configurar o wallet para o provider
-    const wallet = {
-      publicKey: walletKeypair.publicKey,
-      signTransaction: async (tx) => {
-        tx.partialSign(walletKeypair);
-        return tx;
-      },
-      signAllTransactions: async (txs) => {
-        return txs.map(tx => {
+    // Configurar o provider com a carteira
+    const provider = new AnchorProvider(
+      connection, 
+      { 
+        publicKey: walletKeypair.publicKey, 
+        signTransaction: async (tx) => {
           tx.partialSign(walletKeypair);
           return tx;
-        });
-      }
-    };
-    
-    // Configurar o provider
-    const provider = new AnchorProvider(connection, wallet, { 
-      commitment: 'confirmed',
-      // Esta é a parte chave: permitir que o runtime do Anchor
-      // gerencie contas que não são signatárias
-      skipPreflight: false, 
-    });
+        }, 
+        signAllTransactions: async (txs) => {
+          return txs.map(tx => {
+            tx.partialSign(walletKeypair);
+            return tx;
+          });
+        }
+      },
+      { commitment: 'confirmed' }
+    );
     
     // Inicializar o programa
     const program = new Program(idl, PROGRAM_ID, provider);
+    
+    // Gerar um novo keypair para o estado
+    const stateKeypair = Keypair.generate();
+    console.log("🔑 Novo endereço de estado: " + stateKeypair.publicKey.toString());
     
     // Inicializar o estado do programa
     console.log("\n📝 INICIALIZANDO O ESTADO DO PROGRAMA...");
     
     try {
-      // NOTA IMPORTANTE: Não estamos adicionando explicitamente o stateKeypair como signatário
-      // porque o programa parece estar criando a conta internamente.
-      
-      // Vamos verificar se a conta state existe
-      const stateInfo = await connection.getAccountInfo(stateKeypair.publicKey);
-      
-      if (stateInfo !== null) {
-        console.log("⚠️ A conta de estado já existe. Usando uma nova...");
-        // Gerar um novo keypair
-        const newStateKeypair = Keypair.generate();
-        console.log("🔑 Novo endereço de estado: " + newStateKeypair.publicKey.toString());
-        // substituir o keypair
-        Object.assign(stateKeypair, newStateKeypair);
-      }
-      
-      // Tentar com init_if_needed flag para o Anchor
-      console.log("📝 Inicializando o programa...");
-      
-      // Calcular o espaço necessário para a conta de estado
-      const space = 8 + 32 + 32 + 4 + 4; // 8 (discriminador) + 32 (owner) + 32 (multisig_treasury) + 4 (next_upline_id) + 4 (next_chain_id)
-      const rentExemptionAmount = await connection.getMinimumBalanceForRentExemption(space);
-      
-      // Criar transação para criar a conta
-      const createAccountTx = SystemProgram.createAccount({
-        fromPubkey: walletKeypair.publicKey,
-        newAccountPubkey: stateKeypair.publicKey,
-        lamports: rentExemptionAmount,
-        space: space,
-        programId: PROGRAM_ID
-      });
-      
-      // Assinar e enviar a transação para criar a conta
-      const createAccountTxid = await provider.sendAndConfirm(
-        createAccountTx, 
-        [stateKeypair]
-      );
-      
-      console.log("✅ Conta de estado criada: " + createAccountTxid);
-      
-      // Agora inicializar a conta (ela já existe)
       const tx = await program.methods
         .initialize()
         .accounts({
@@ -151,6 +107,7 @@ async function main() {
           owner: walletKeypair.publicKey,
           systemProgram: SystemProgram.programId,
         })
+        .signers([stateKeypair])
         .rpc();
       
       console.log("✅ PROGRAMA INICIALIZADO COM SUCESSO: " + tx);
@@ -160,12 +117,7 @@ async function main() {
       const stateInfo = await program.account.programState.fetch(stateKeypair.publicKey);
       console.log("\n📊 INFORMAÇÕES DO ESTADO DA MATRIZ:");
       console.log("👑 Owner: " + stateInfo.owner.toString());
-      
-      // Verificar se o campo multisigTreasury existe antes de tentar acessá-lo
-      if (stateInfo.multisigTreasury) {
-        console.log("🏦 Multisig Treasury: " + stateInfo.multisigTreasury.toString());
-      }
-      
+      console.log("🏦 Multisig Treasury: " + stateInfo.multisigTreasury.toString());
       console.log("🆔 Próximo ID de upline: " + stateInfo.nextUplineId.toString());
       console.log("🆔 Próximo ID de chain: " + stateInfo.nextChainId.toString());
       
@@ -218,7 +170,8 @@ async function main() {
               TOKEN_MINT                    // mint
             );
             
-            const signature = await provider.sendAndConfirm(ataIx);
+            const tx = new Transaction().add(ataIx);
+            const signature = await provider.sendAndConfirm(tx);
             console.log("✅ ATA do vault criada: " + signature);
           } catch (e) {
             console.log("⚠️ Erro ao criar ATA do vault: " + e.message);
@@ -242,7 +195,7 @@ async function main() {
         vaultAuthorityBump,
         programTokenVault: programTokenVault.toString(),
         ownerWallet: walletKeypair.publicKey.toString(),
-        multisigTreasury: MULTISIG_TREASURY.toString()
+        multisigTreasury: MULTISIG_TREASURY.toString() // Adicionado ao arquivo de configuração
       };
       
       // Criar diretório para o arquivo de configuração se não existir
@@ -258,7 +211,7 @@ async function main() {
       console.log("🔑 ENDEREÇO DO PROGRAMA: " + PROGRAM_ID.toString());
       console.log("🔑 ESTADO DO PROGRAMA: " + stateKeypair.publicKey.toString());
       console.log("🔑 OWNER DO PROGRAMA: " + walletKeypair.publicKey.toString());
-      console.log("🏦 MULTISIG TREASURY: " + MULTISIG_TREASURY.toString());
+      console.log("🏦 MULTISIG TREASURY: " + MULTISIG_TREASURY.toString()); // Adicionado nos logs
       console.log("🔑 PDA MINT AUTHORITY: " + tokenMintAuthority.toString());
       console.log("🔑 PDA SOL VAULT: " + programSolVault.toString());
       console.log("🔑 PDA VAULT AUTHORITY: " + vaultAuthority.toString());

@@ -1,0 +1,28 @@
+{
+  "transacao1": {
+    "descricao": "Criar ATA WSOL para a multisig treasury",
+    "base58Transaction": "a1QsAmVdzPhDs4WdBLehx5qv14KdcXCNeCTMMNQK6EbYhg98trGzKFRFh2XnHShxZFTY51SxKZXN9hKBb8CCWVmfNmZCBEXfBwxAqogj1iLvQRqk1B1fExX7fnVWiorGsr1xAREXuUMo2WnuYe2Pn98w76KQfDccejugcVXYqWhj93K91ZuzoY6qMCiwBwYJgqzB3jdj6LQqvSjHXiUHajqvJP81Q9gZhgqZFYxGZ1AmyKEgMXpHPoFteBvsQmSJ6B7c4YGG5sJeETLaPFn8S7Sg2D6mcf7BbbuxmLsaD9iApv68HY1ZEzwU6RW9rAKmY6rvGsaT4RcRjY5UsJPn8TNiX2VZVs6hSobFP7mQBHJ5uSyZ1XqZB3bh6RygNggSpUg2j1PRnnnT6RAbEC2eLjMo8u4DYVJmefLnWNkh65uCwQb5FvFd1svkFUhKtfP8fH1WKWmpSdV",
+    "instrucoesIncluidas": [
+      "createAssociatedTokenAccount"
+    ]
+  },
+  "transacao2": {
+    "descricao": "Transferir SOL, sincronizar e registrar usuário base",
+    "base58Transaction": "6C3oT4GcWm4Y7caqepmgAuBPEDowruAiuafv4oPAF4dVCj6bnAMwD9ZnojKgwNx6PVv5JPVvByWfFfsum8CgSAvMYWBoqbVYsmRg9U2hSwSRQUncZnysNcm2GFxktsPNQRu1rka268BcB2iwsWvdkFemBAAn4nZKexURfy7fU5MFf5hZSGTfjk14627tHzE1FTtVixAdPMHFZBEvtmymSP5VDRuN96ZLKLi6rhRsYdyuAmwk2XJwqPxpXsqcAZB6qG7K6vQJVCUvWq1A1oNrYSedjwAQqLt46frKbfUXibh2qxHYyEDSw1SgL2nRdG3wznyksNxwFETCNYugKMHEZkToVVDYTd7EZTw7LyTWN6mpbfZ4tzQg9QLwkJYn17qoZRWQ5WFG2CWKCpHnR2vX3qpadz6WkmT74kDh9UUKM6iy6STSLUorUkn4mLWQhjGKDGPUM51Vr2edT5cYCTrXACqgDDmHE9jQdcA4Yr6tEPq49B51zXFSee4MRtgj6rgKEMAUjL8w29rZjgaq7VwJnSfNnhGS9rm34rucvq8gT7g7HqM255uyYNmaH5BuidLFk9F95dgb4Pej4dQCPCmhMvZ1tNbbjFsrBjAZegCnDSeBbRkoZYbCXKztwcakHci9KaKhZcWYTUC8qKP8LoWQZwiogjzgVvk5hkiV9w2zvw9LybZQZyFHp57S96CDwsa6GvwsFRwxbScZTfjc1VXipyHVdaQDVKd3EpEg9apsrFZrpiTzJEYwDmZTEMRK1L58hqCzkFAhKYHCm2UwsTHB7xYXYe6ZzrmCHwh4J9ksSqnkEYp5BLE7SaxbVRLUJmQYGWvxvYHHuav4cs7LEkc2J5oCBiX4ovuXWfEAS4QPEmyCMWRwWHwGRozdY5fSwfB87avh2ftKQDKZ8Nb5hkomUpZi4gVqK8payZvC7ePwAeJG1mLeeTRmwSbwCAzMbUvmFLUBRZxQ1v5xvTRY78LrsNgMemjvUd2FX4gXr6z6tTFgZA6neGadpacMperFLobuDRWHTTiEGkqFfTdRWYtkgJ7wn2Jwh5yVrcip8HsuF6rApMnnnsqKAiQdkvXXiBtjtiwxS62AKVHoLCPVagQW8dnSvTwi8Q8bU4pk3ALNwR5HqWseyEhvkdRuoFvMSmQ5eXsxKuEixxeLzrSgNZqbHgJ1L2qG89eu7x76JJWtBsT3WZHwqTxLNsW139njK5GTT4zVcUGpyYaytrAFX2iWPFbXsjVGR3CsgSd3TAsUK",
+    "instrucoesIncluidas": [
+      "setComputeUnitLimit",
+      "setComputeUnitPrice",
+      "transfer",
+      "syncNative",
+      "registerWithoutReferrer"
+    ]
+  },
+  "informacoes": {
+    "multisigTreasury": "Eu22Js2qTu5bCr2WFY2APbvhDqAhUZpkYKmVsfeyqR2N",
+    "userPDA": "CCXSEJnSMB65EhrrSujr9k7BMY22aLddmU6uLXCC5uyC",
+    "userWsolATA": "BGVnhBTx55GavbwaVzLFEoqiVLZ5wvu6q2m7rUd5XkVF",
+    "stateAddress": "4BEsGJgHdpGnvVyiNYE2LKVRfRij7mjrQyW6C51j1gS8",
+    "programId": "2SGUTp3c4oNUpTdsr1nEfp2j96VEyFVfQLqK7kNukHGk",
+    "depositAmount": 100000000
+  }
+}
